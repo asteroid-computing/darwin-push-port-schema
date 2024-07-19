@@ -18,6 +18,6 @@ jobs:
               
               .\xsd "${{ github.workspce }}\v24\schemas\rttiPPTSchema_v18.xsd /c /out:${{ github.workspace }}\v24
               
-              cd "${{ github.workspace }}\v24"
+              cd "${{ github.workspace }}\v24\"
               
               dir
