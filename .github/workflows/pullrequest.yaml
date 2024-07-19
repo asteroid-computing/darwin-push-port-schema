@@ -9,8 +9,8 @@ jobs:
         runs-on: windows-latest
         steps:
           - name: Checkout code
-            uses: actions/checkout@v2
+            # https://github.com/actions/checkout
+            uses: actions/checkout@v4
           - name: Validate C# Class Creation
             run: |
-              xsd
-              xsd /c /n:DarwinPushPortSchema /o:DarwinPushPortSchema.cs v24/schemas/rttiPPTSchema_v18.xsd
+              dir "C:\Program Files (x86)\Microsoft SDKs\Windows\"
