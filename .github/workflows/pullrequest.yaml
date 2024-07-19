@@ -11,6 +11,18 @@ jobs:
           - name: Checkout code
             # https://github.com/actions/checkout
             uses: actions/checkout@v4
+          - name: Generate xsd Params File
+            id: xsd-params-file
+            # https://github.com/actions/github-script
+            uses: actions/github-script@v7
+            with:
+              script: |
+                const path = require('node:path');
+                const generateXsdParams = require(`${process.env.GITHUB_WORKSPACE}${path.sep}.astrocompute${path.sep}tools${path.sep}generateXsdParamsFile.js`);
+                
+                result = generateXsdParams({github, context, core, targetPath: ``${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas`});
+                
+                core.setOutput('OUTPUT_FILE_NAME', result.outFileName);
           - name: Validate C# Class Creation
             run: |
               $Env:PATH += ";C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools"
@@ -19,6 +31,30 @@ jobs:
               
               xsd /p:xsdParams.xml
               
-              cd "${{ github.workspace }}\v24\"
+              New-Item -ItemType Directory -Path "${{ github.workspace }}\pkg"
+              Move-Item -Path .\${{ steps.xsd-params-file.outputs.OUTPUT_FILE_NAME }} -Destination "${{ github.workspace }}\pkg\DarwinPushPort_v24.cs"
               
+              cd "${{ github.workspace }}\pkg"
               dir
+          - name: Add Job Summary
+            # https://github.com/actions/github-script
+            uses: actions/github-script@v7
+            with:
+              script: |
+                const fs = require('node:fs');
+                
+                core.summary.addRaw('<details>');
+                core.summary.addEOL();
+                core.summary.addRaw('<summary>DarwinPushPort_v24.cs</summary>');
+                core.summary.addEOL();
+                
+                core.summary.addRaw('```c#');
+                core.summary.addEOL();
+                
+                cores.summary.addRaw(fs.readFileSync(`${process.env.GITHUB_WORKSPACE}\pkg\DarwinPushPort_v24.cs`, 'utf8')) ;
+                
+                core.summary.addEOL();
+                core.summary.addRaw('```');
+                
+                core.summary.addEOL();
+                core.summary.addRaw('</details>');
