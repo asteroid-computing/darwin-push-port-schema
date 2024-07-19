@@ -36,6 +36,6 @@
         <schema>rttiPPTStatus_v1.xsd</schema>
         <schema>rttiPPTTDData_v1.xsd</schema>
         <schema>rttiPPTTrainAlerts_v1.xsd</schema>
-        <schema>rttiPPTTrainOrder_v1.xsd</schema>
+        <schema>.\rttiPPTTrainOrder_v1.xsd</schema>
     </generateClasses>
 </xsd>
