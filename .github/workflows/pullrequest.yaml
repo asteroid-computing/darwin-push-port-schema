@@ -49,13 +49,7 @@ jobs:
                 core.summary.addRaw('<summary>DarwinPushPort_v24.cs</summary>');
                 core.summary.addEOL();
                 
-                core.summary.addRaw('```c#');
-                core.summary.addEOL();
-                
-                core.summary.addRaw(fs.readFileSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`, 'utf8')) ;
-                
-                core.summary.addEOL();
-                core.summary.addRaw('```');
+                core.summary.addCodeBlock(fs.readFileSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`, 'utf8'), 'csharp');
                 
                 core.summary.addEOL();
                 core.summary.addRaw('</details>');
