@@ -16,7 +16,7 @@ jobs:
               
               cd "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\"
               
-              .\xsd ${{ github.workspce }}\v24\schemas\rttiPPTSchema_v18.xsd /c /out:${{ github.workspace }}\v24
+              .\xsd ${{ github.workspace }}\v24\schemas\rttiPPTSchema_v18.xsd /c /out:${{ github.workspace }}\v24
               
               cd "${{ github.workspace }}\v24\"
               
