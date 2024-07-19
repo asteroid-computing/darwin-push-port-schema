@@ -6,10 +6,11 @@ on:
   workflow_dispatch: 
 jobs: 
     pull-request-checks:
-        runs-on: ubuntu-latest
+        runs-on: windows-latest
         steps:
           - name: Checkout code
             uses: actions/checkout@v2
-          - name: Validation
+          - name: Validate C# Class Creation
             run: |
-              echo "Validation"
+              xsd
+              xsd /c /n:DarwinPushPortSchema /o:DarwinPushPortSchema.cs v24/schemas/rttiPPTSchema_v18.xsd
