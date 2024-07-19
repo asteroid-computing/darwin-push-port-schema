@@ -43,6 +43,8 @@ jobs:
                 const readline = require('node:readline');
                 const path = require('node:path');
                 
+                const createPkgDir = fs.mkdirSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg`, { recursive: true });
+                
                 const srcFile = fs.createReadStream(`${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas${path.sep}${process.env.OUTPUT_FILE_NAME}`);
                 const destFile = fs.createWriteStream(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`);
                 const srcRL = readline.createInterface({
