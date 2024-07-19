@@ -20,7 +20,7 @@ jobs:
                 const path = require('node:path');
                 const generateXsdParams = require(`${process.env.GITHUB_WORKSPACE}${path.sep}.astrocompute${path.sep}tools${path.sep}generateXsdParamsFile.js`);
                 
-                result = generateXsdParams({github, context, core, targetPath: ``${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas`});
+                result = generateXsdParams({github, context, core, targetPath: `${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas`});
                 
                 core.setOutput('OUTPUT_FILE_NAME', result.outFileName);
           - name: Validate C# Class Creation
