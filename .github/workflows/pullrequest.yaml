@@ -6,10 +6,84 @@ on:
   workflow_dispatch: 
 jobs: 
     pull-request-checks:
-        runs-on: ubuntu-latest
+        runs-on: windows-latest
         steps:
           - name: Checkout code
-            uses: actions/checkout@v2
-          - name: Validation
+            # https://github.com/actions/checkout
+            uses: actions/checkout@v4
+          - name: Generate xsd Params File
+            id: xsd-params-file
+            # https://github.com/actions/github-script
+            uses: actions/github-script@v7
+            with:
+              script: |
+                const path = require('node:path');
+                const generateXsdParams = require(`${process.env.GITHUB_WORKSPACE}${path.sep}.astrocompute${path.sep}tools${path.sep}generateXsdParamsFile.js`);
+                
+                result = generateXsdParams({github, context, core, targetPath: `${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas`});
+                
+                core.setOutput('OUTPUT_FILE_NAME', result.outFileName);
+          - name: Validate C# Class Creation
             run: |
-              echo "Validation"
+              $Env:PATH += ";C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools"
+              
+              cd "${{ github.workspace }}\v24\schemas\"
+              
+              xsd /p:xsdParams.xml
+              
+              dir
+          - name: Clean Up Generated File
+            # https://github.com/actions/github-script
+            uses: actions/github-script@v7
+            env: 
+                OUTPUT_FILE_NAME: ${{ steps.xsd-params-file.outputs.OUTPUT_FILE_NAME }}
+            with:
+              script: |
+                const fs = require('node:fs');
+                const readline = require('node:readline');
+                const path = require('node:path');
+                
+                const createPkgDir = fs.mkdirSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg`, { recursive: true });
+                
+                const srcFile = fs.createReadStream(`${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas${path.sep}${process.env.OUTPUT_FILE_NAME}`);
+                const destFile = fs.createWriteStream(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`);
+                const srcRL = readline.createInterface({
+                    input: srcFile,
+                    output: destFile,
+                    terminal: false
+                });
+                
+                srcRL.on('line', (line) => {
+                    if (line.includes('/// <remarks/>')) {
+                        line = '';
+                    }
+                    destFile.write(`${line}\n`);
+                });
+                
+                srcRL.on('close', () => {
+                    srcFile.close();
+                    destFile.close();
+                });
+                
+          - name: Add Job Summary
+            # https://github.com/actions/github-script
+            uses: actions/github-script@v7
+            with:
+              script: |
+                const fs = require('node:fs');
+                const path = require('node:path');
+                
+                core.summary.addRaw('<details>');
+                core.summary.addEOL();
+                core.summary.addRaw('<summary>DarwinPushPort_v24.cs</summary>');
+                core.summary.addEOL();
+                
+                let fileContents = fs.readFileSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`, 'utf8');
+                fileContents.replaceAll(`/// <remarks/>\n`, '');
+                
+                core.summary.addCodeBlock(fileContents, 'csharp');
+                
+                core.summary.addEOL();
+                core.summary.addRaw('</details>');
+                
+                core.summary.write();
