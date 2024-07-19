@@ -1,3 +1,5 @@
 const local = require('./generateXsdParamsFile.js');
 
-local({github: 'github', context: 'context'});
+result = local({github: 'github', context: 'context', targetPath: '../../v24/schemas'});
+
+console.log(JSON.stringify(result, null, 2))

@@ -1,5 +1,6 @@
 module.exports = ({github, context, targetPath}) => {
     const fs = require('node:fs');
+    const path = require('node:path');
     
     const dir = fs.readdirSync(targetPath, {withFileTypes: true});
     
@@ -16,12 +17,13 @@ module.exports = ({github, context, targetPath}) => {
     xsdParams += `<xsd xmlns='http://microsoft.com/dotnet/tools/xsd/'>\n`;
     xsdParams += `  <generateClasses language='CS' namespace='DarwinPushPort.v24'>\n`;
     
-    xsdFiles.forEach((file) => {
-        xsdParams += `    <schema>${file.name}</schema>\n`;
-    });
-    
     for (let i = 0; i < xsdFiles.length; i++) {
-        xsdParams += `    <schema>${ i + 1 === xsdFiles.length && `.${path.sep}` }${xsdFiles[i].name}</schema>\n`;
+        let lastFilePrefix = '';
+        
+        if (i + 1 === xsdFiles.length) {
+            lastFilePrefix = `.${path.sep}`
+        }
+        xsdParams += `    <schema>${lastFilePrefix}${xsdFiles[i].name}</schema>\n`;
     }
     
     xsdParams += `  </generateClasses>\n`;
