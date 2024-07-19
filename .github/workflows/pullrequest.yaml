@@ -31,11 +31,38 @@ jobs:
               
               xsd /p:xsdParams.xml
               
-              New-Item -ItemType Directory -Path "${{ github.workspace }}\pkg"
-              Move-Item -Path .\${{ steps.xsd-params-file.outputs.OUTPUT_FILE_NAME }} -Destination "${{ github.workspace }}\pkg\DarwinPushPort_v24.cs"
-              
-              cd "${{ github.workspace }}\pkg"
               dir
+          - name: Clean Up Generated File
+            # https://github.com/actions/github-script
+            uses: actions/github-script@v7
+            env: 
+                OUTPUT_FILE_NAME: ${{ steps.xsd-params-file.outputs.OUTPUT_FILE_NAME }}
+            with:
+              script: |
+                const fs = require('node:fs');
+                const readline = require('node:readline');
+                const path = require('node:path');
+                
+                const srcFile = fs.createReadStream(`${process.env.GITHUB_WORKSPACE}${path.sep}v24${path.sep}schemas${path.sep}${process.env.OUTPUT_FILE_NAME}`);
+                const destFile = fs.createWriteStream(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`);
+                const srcRL = readline.createInterface({
+                    input: srcFile,
+                    output: destFile,
+                    terminal: false
+                });
+                
+                srcRL.on('line', (line) => {
+                    if (line.includes('/// <remarks/>')) {
+                        line = '';
+                    }
+                    destFile.write(`${line}\n`);
+                });
+                
+                srcRL.on('close', () => {
+                    srcFile.close();
+                    destFile.close();
+                });
+                
           - name: Add Job Summary
             # https://github.com/actions/github-script
             uses: actions/github-script@v7
@@ -49,7 +76,10 @@ jobs:
                 core.summary.addRaw('<summary>DarwinPushPort_v24.cs</summary>');
                 core.summary.addEOL();
                 
-                core.summary.addCodeBlock(fs.readFileSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`, 'utf8'), 'csharp');
+                let fileContents = fs.readFileSync(`${process.env.GITHUB_WORKSPACE}${path.sep}pkg${path.sep}DarwinPushPort_v24.cs`, 'utf8');
+                fileContents.replaceAll(`/// <remarks/>\n`, '');
+                
+                core.summary.addCodeBlock(fileContents, 'csharp');
                 
                 core.summary.addEOL();
                 core.summary.addRaw('</details>');
