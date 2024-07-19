@@ -1,0 +1,15 @@
+name: Pull Request Checks
+on:
+  pull_request: 
+    branches:
+      - main
+  workflow_dispatch: 
+jobs: 
+    pull-request-checks:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+          - name: Validation
+            run: |
+              echo "Validation"
